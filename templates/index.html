@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Tobot</title>  
+        <meta charset="UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" href="/assets/css/main.css">
+        <link rel="stylesheet" href="/assets/css/index/index.css">
+        <!-- <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap&subset=cyrillic" rel="stylesheet">  -->
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300&display=swap&subset=cyrillic" rel="stylesheet"> 
+        <!-- <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:300&display=swap&subset=cyrillic" rel="stylesheet"> -->
+        <script type="text/javascript" src="/assets/js/index/index.js"></script>
+    </head>
+    <body>
+        <main class="main">
+            <section class="background">
+                <span class="image image--tobot"></span>
+            </section>
+            <section class="content">
+                <div class="content__item primary">
+                    <h1 class="title">Tobot</h1>
+                    <div class="controls">
+                        <button class="controls__item hover--zoom" onclick="App.signIn.showForm()" title="Sign in">
+                            <i class="icon icon--sign-in controls-icon"></i>
+                            <!-- <span class="controls-text">Sign in</span> -->
+                        </button>
+                        <button class="controls__item hover--zoom" onclick="App.signUp.showForm()" title="Sign up">
+                            <i class="icon icon--sign-up controls-icon"></i>
+                            <!-- <span class="controls-text">Sign up</span> -->
+                        </button>
+                    </div>
+                    <button class="content__button hover--zoom" onclick="App.about.show()" title="About Tobot">
+                        <i class="icon icon--about"></i>
+                    </button>
+                </div>
+                <div class="content__item slide sign-in">
+                    <!-- <div class="secondary__item sign-in"> -->
+                        <div class="headline">
+                            <button class="return" onclick="App.signIn.hideForm()" title="Return">
+                                <i class="icon icon--return"></i>
+                            </button>
+                            <h1 class="title">Sign in</h1>
+                        </div>
+                        <form action="" class="sign-in__form form">
+                            <input class="form__item" name="login" type="text" placeholder="Login" required>
+                            <input class="form__item" name="password" type="password" placeholder="Password" required>
+                            <button class="form__submit hover--zoom" type="submit" title="Submit" onclick="App.signIn.submitForm(event)">
+                                <i class="icon icon--submit"></i>
+                            </button>
+                        </form>
+                    <!-- </div> -->
+                    <!-- <div class="secondary__item sign-up">
+                        <h1 class="title">Sign up</h1>
+                        <form action="" class="sign-up__form form">
+
+                        </form>
+                    </div> -->
+                </div>
+                <div class="content__item slide sign-up">
+                    <div class="headline">
+                        <button class="return" onclick="App.signUp.hideForm()">
+                            <i class="icon icon--return"></i>
+                        </button>
+                        <h1 class="title">Sign up</h1>
+                    </div>
+                    <form action="" class="sign-up__form form">
+                        <input class="form__item" name="email" type="email" placeholder="Email" required>
+                        <input class="form__item" name="login" pattern="[a-zA-Z0-9]{3,33}" type="text" placeholder="Login" required>
+                        <input class="form__item" name="password" pattern="[a-zA-Z0-9]{6,33}" type="password" placeholder="Password" required>
+                        <input class="form__item" name="passwordRepeat" pattern="[a-zA-Z0-9]{6,33}" type="password" placeholder="Password Repeat" required>
+                        <button class="form__submit hover--zoom" type="submit" title="Submit" onclick="App.signUp.submitForm(event)">
+                            <i class="icon icon--submit"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="content__item slide from-bottom about">
+                    <div class="headline">
+                        <button class="tray" onclick="App.about.hide()" title="Collapse">
+                            <i class="icon icon--return"></i>
+                        </button>
+                        <h1 class="title">About</h1>
+                    </div>
+                    <div class="description">
+                        <article class="description__item">
+                            <p>
+                                Tobot is a todo administrative tool with some extra features. 
+                                App was inspired by desire to make todo task managing experience more delightful.
+                                Be sure, You won't miss anything! :)
+                            </p>
+                            <p class="signature font-bold">
+                                Yours everyday mate,
+                                <br/>
+                                Tobot
+                            </p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </body>
+</html>
