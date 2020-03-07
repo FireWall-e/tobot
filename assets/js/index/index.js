@@ -1,23 +1,73 @@
 window.onload = () => {
     this.App = new function() {
 
-        const loading = function(container) {
+        const modal = function () {
+            this.create = (customClassname = '', clickToRemove = false) => {
+                const className = customClassname ? 'modal ' + customClassname : 'modal';
+                if (document.querySelector('.' + className.trim().replace(/\s/g, '.'))) return;
+                this.modal = document.createElement('div');
+                this.modal.className = className;
+                if (clickToRemove) {
+                    this.modal.style.cursor = 'pointer';
+                    this.modal.addEventListener('click', this.modal.remove);
+                }
+                // if (content) this.addContent(content);
+            };
+
+            this.addContent = (content, position = 'beforeEnd') => {
+                console.log('content is ', content);
+                if (typeof content === 'string') {
+                    this.modal.insertAdjacentHTML(position, content);
+                }
+                else {
+                    this.modal.append(content);
+                }
+            };
+
+            this.removeContent = () => {
+                this.modal.innerHTML = '';
+            };
+
+            this.pushIn = (container) => {
+                this.container = container;
+                console.log('OOOOOOOOOO', this.modal, this.modal.classList);
+                this.modal.classList.add('show');
+                container.append(this.modal);
+            };
+
+            this.hide = (removeContent = false) => {
+                this.modal.classList.remove('show');
+                if (removeContent) this.removeContent();
+            };
+
+            this.remove = () => {
+                this.modal.remove();
+            }
+        };
+
+        const loading = function (container) {
             // container.insertAdjacentHTML('<div></div>', 'beforeend');
 
             const spinner = document.createElement('i');
-                  spinner.className = 'loading__spinner icon icon--loading';
-            const spinnerContainer = document.createElement('div');
-                  spinnerContainer.className = 'loading';
+                  spinner.className = 'spinner icon icon--loading';
+            // const container = document.createElement('div');
+            //       container.className = 'modal';
+                //   modal.create();
+            const loadingModal = new modal();
+                  loadingModal.create();
 
             this.start = () => {
                 document.activeElement.blur();
-                spinnerContainer.append(spinner);
-                container.append(spinnerContainer);
-            }
+                // container.append(spinner);
+                loadingModal.addContent(spinner);
+                loadingModal.pushIn(container);
+                // container.append(loadingModal);
+            };
+
             this.end = () => {
-                spinnerContainer.remove();
-            }
-        }
+                loadingModal.remove();
+            };
+        };
 
         const post = (options) => {
             const headers = options.requestHeaders || {
@@ -28,7 +78,12 @@ window.onload = () => {
 
             xhr.onload = () => {
                 console.log('x is ', xhr);
-                if (options.success) options.success(xhr.response);
+              
+                if (options.success) {
+                    let response = JSON.parse(JSON.stringify(xhr.response));
+                    if (typeof response === 'string') response = response.replace(/"/g, '');
+                    options.success(response);
+                }
             };
 
             xhr.onloadend = () => {
@@ -182,7 +237,9 @@ window.onload = () => {
             const selector = 'sign-in';
 
             this.showForm = showSlide(selector);
+
             this.hideForm = hideSlide(selector);
+
             this.submitForm = (event) => {
                 const form = document.querySelector('.' + selector + '__form');
                 proceedForm(event, form, {
@@ -197,8 +254,8 @@ window.onload = () => {
                                     password: formData.password
                                 } 
                             },
-                            onload: (result) => {
-                                console.log('sign-in result is ', result)
+                            success: (response) => {
+                                console.log('sign-in result is ', response)
                             }
                         });
                     }
@@ -221,10 +278,13 @@ window.onload = () => {
             };
 
             this.showForm = showSlide(selector);
+
             this.hideForm = hideSlide(selector);
+
             this.submitForm = (event) => {
                 // event.preventDefault();
-                const loadingSpin = new loading(document.querySelector('.content'));
+                const container = document.querySelector('.content');
+                const loadingSpin = new loading(container);
                       loadingSpin.start();
                 // setTimeout(()=>loadingSpin.end(), 2000);
                 // setTimeout('loadingSpin.start', 2000);
@@ -255,8 +315,28 @@ window.onload = () => {
                                     password: formData.password
                                 }
                             },
-                            onload: (result) => {
-                                console.log('signUp result is ', result);
+                            success: (response) => {
+                                console.log('signUp result is ', response, response.replace(/"/g, ''), typeof response.replace(/"/g, ''));
+                                const responseModal = new modal();
+                                      responseModal.create('sign-up-modal', true);
+                                if (response === 'userExists') {
+                                    console.log('IIIIIIIIIIIIIIIIIIIIIIIII22');
+                                    responseModal.addContent(`
+                                        <div class="modal__item">
+                                            User already exists!
+                                        </div>
+                                    `);
+                                }
+                                else if (response === 'userRegistered') {
+                                    console.log('IIIIIIIIIIIIIIIIIIIIIIIII11');
+                                    responseModal.addContent(`
+                                        <div class="modal__item">
+                                            Registration completed!
+                                        </div>
+                                    `);
+                                }
+                                console.log('LLLLLLLLLLLL', responseModal);
+                                responseModal.pushIn(container);
                             },
                             always: (response) => {
                                 console.log('RRRRR', response);
@@ -276,7 +356,8 @@ window.onload = () => {
 
         this.about = new function() {
             this.show = showSlide('about');
+
             this.hide = hideSlide('about');
-        }
+        };
     };
 };

@@ -1,6 +1,7 @@
 def Main(actionName, payload, dbConfig):
     # print('KOK', doAction)
     import dataset
+
     db = dataset.connect(dbConfig['url'])
     print('OK')
     # return doAction(actionName, {'payload': payload, 'db': db})
@@ -9,24 +10,33 @@ def Main(actionName, payload, dbConfig):
 def signIn(payload, db):
     table = db['users']
     user = table.find_one(login = payload['login'], password = payload['password'])
-    return 'userExist' if user else 'userDoesntExist'
+    return 'userExists' if user else 'userDoesntExist'
 
 def signUp(payload, db):
+    from functions.main import isIterable
+
     table = db['users']
     users = table.all()
     for user in users:
         print('db users table row is ', user)
     # print('tableis ', )
     print('payload is ', payload)
-    user = table.find_one(email = payload['email'], login = payload['login'])
-    if user: 
-        return 'userExist'
+    user = db.query(
+        'SELECT id FROM users WHERE email = :email OR login = :login', 
+        {
+            'email': payload['email'],
+            'login': payload['login']
+        }
+    )
+
+    if isIterable(user): 
+        return 'userExists'
     else:
-        table.insert(dict(
-            email = payload['email'], 
-            login = payload['login'],
-            password = payload['password']
-        ))
+        table.insert({
+            'email': payload['email'], 
+            'login': payload['login'],
+            'password': payload['password']
+        })
         return 'userRegistered'
     
         

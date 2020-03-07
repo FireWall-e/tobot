@@ -162,11 +162,13 @@ class RequestHandler():
                     data = dynamicImport(self.config['ajax']['module-path'] + requestFileName, 'Main')(**kwargs)
                     # self.contentType = data['content-type']
                     # data = getattr(data, 'init')
+                    print('^^^^^^^^^^^^^^^^^^^^^^^^')
                 else:
                     # fileToRespond = self.config['template']['directory-path'] + Routes[requestPath]['template']
                     self.contentType = self.requestConfig['private'][requestExtension]['content-type']
                     data = dynamicImport(self.config['template']['module-path'] + requestFileName, 'Main')(requestParams = self.pathExtractParams(requestPath))
-
+                    
+                    # data = 'awdawd'
                 print('############', data)
                 # wow.kek(wow)
 

@@ -23,23 +23,15 @@ class Server(BaseHTTPRequestHandler):
     # print('file extension is ', file_extension)
     # print('.headers.get is ', self.headers)
     responseContentBytes = self.requestHandler.proceedRequest(requestPath = self.path)
-    self.send_response(self.requestHandler.status)
-    self.send_header("Content-type", self.requestHandler.contentType)
-    self.end_headers()
+    # self.send_response(self.requestHandler.status)
+    # self.send_header("Content-type", self.requestHandler.contentType)
+    # self.end_headers()
     self.respond(responseContentBytes)
     
   def do_POST(self):
     import cgi
     # content_len = int(self.headers.get('Content-Length'))
     # post_body = self.rfile.read(content_len)
-    # form = cgi.FieldStorage(
-    #   fp = self.rfile, 
-    #   headers = self.headers,
-    #   environ = {
-    #     'REQUEST_METHOD':'POST',
-    #     'CONTENT_TYPE':self.headers['Content-Type']
-    #   }
-    # )
     print('HEADERS ARE', self.headers)
     print('CONTENT TYPE RECEIVED',  self.headers['Content-Type'])
     responseContentBytes = self.requestHandler.proceedRequest(
@@ -54,6 +46,7 @@ class Server(BaseHTTPRequestHandler):
         }
       )
     )
+   
     # print( form, form.getvalue('test'))
     self.respond(responseContentBytes)
     
@@ -68,5 +61,8 @@ class Server(BaseHTTPRequestHandler):
     
   def respond(self, responseContentBytes):
     # content = self.handle_http()
+    self.send_response(self.requestHandler.status)
+    self.send_header("Content-type", self.requestHandler.contentType)
+    self.end_headers()
     self.wfile.write(responseContentBytes)
     # self.wfile.close()

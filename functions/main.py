@@ -11,3 +11,6 @@ def findProperty(dictionary, propertiesVector, returnValueIfTrue = False):
         else: # True
             continue
     return dictionary if returnValueIfTrue else True
+
+def isIterable(iterator):
+    return any(True for _ in iterator)
