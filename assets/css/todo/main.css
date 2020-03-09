@@ -1,0 +1,192 @@
+.image--todo {
+    /* background-image: url('/assets/image/todo/todo.jpg'); */
+    background-image: url('/assets/image/todo/todo.jpg');
+}
+
+.modal.loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 999;
+}
+
+.content {
+    width: 50%;
+    height: 100%;
+    max-height: 100%;
+    margin: auto;
+    padding: var(--padding-medium) 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(255,255,255, .9);
+    padding: var(--padding-medium) 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.container.empty {
+    padding: 0;
+}
+
+.container .modal.loading {
+    background-color: rgba(255,255,255, .8);
+}
+
+.todos {
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 0 var(--padding-medium);
+}
+
+/* .todos:not(:empty) {
+    padding: var(--padding-medium);
+} */
+
+.panel {
+    margin-bottom: var(--margin-medium);
+    display: flex;
+    justify-content: flex-end;
+    background-color: rgba(255,255,255, .9);
+    padding: var(--padding-medium);
+}
+
+.panel__item {
+    width: 40px;
+    height: 40px;
+    
+}
+
+.panel__item:not(:last-child) {
+    margin-right: var(--margin-medium);
+}
+
+.icon--add-todo {
+    background-image: url('/assets/image/todo/icon/add-todo-button.svg');
+}
+
+.icon--delete-todos {
+    background-image: url('/assets/image/todo/icon/delete-all-button.svg');
+}
+
+.todo {
+    min-height: 250px;
+    max-height: 250px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(0, 0, 0, .5);
+    overflow: hidden;
+}
+
+/* .todo:first-child {
+    margin-top: var(--margin-medium);
+} */
+
+.todo:not(:last-child) {
+    margin-bottom: var(--margin-medium);
+}
+
+.todo__item {
+    flex: 1;
+    display: flex;
+}
+
+.title {
+    padding: var(--padding-small);
+    margin: auto;
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+}
+
+.text {
+    flex: 5;
+    border-color: rgba(0, 0, 0, .5);
+    border-style: solid;
+    border-width: 1px 0;
+    overflow-y: auto;
+    padding: var(--padding-medium);
+    text-align: justify;
+}
+
+.todo__column {
+    flex: 1;
+    display: flex;
+    padding: 0 var(--padding-medium);
+    align-items: center;
+}
+
+.remind {
+    font-size: 12px;
+    padding: var(--padding-small) var(--padding-medium);
+}
+
+.icon--edit-todo {
+    height: 65%;
+    background-image: url('/assets/image/todo/icon/edit-button.svg');
+}
+
+.icon--delete-todo {
+    background-image: url('/assets/image/todo/icon/delete-button.svg');
+}
+
+.container .icon--delete-todo {
+    height: 65%;
+}
+
+.buttons {
+    justify-content: flex-end;
+}
+
+.todo-button {
+    height: 35px;
+    width: 40px;
+}
+
+.label {
+    margin-right: var(--margin-small);
+}
+
+
+.date:empty::after {
+    content: '- - -';
+}
+
+.icon--save-todo {
+    background-image: url('/assets/image/todo/icon/save-changes-button.svg');
+}
+
+.icon--discard-todo {
+    background-image: url('/assets/image/todo/icon/discard-changes-button.svg');
+}
+
+.datepicker {
+    display: flex;
+}
+
+.datepicker__item {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+    text-align: left;
+}
+
+.datepicker__item:not(:last-child) {
+    margin-right: var(--margin-small);
+}
+
+.remind.valid {
+    background-color:rgba(60,179,113, 0.3);
+}
+
+.remind.invalid {
+    background-color: rgba(255,99,71, 0.3);
+}
+/* 
+.todo-form {
+    display: flex;
+} */

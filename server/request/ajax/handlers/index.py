@@ -9,8 +9,22 @@ def Main(actionName, payload, dbConfig):
 
 def signIn(payload, db):
     table = db['users']
-    user = table.find_one(login = payload['login'], password = payload['password'])
-    return 'userExists' if user else 'userDoesntExist'
+    users = table.all()
+    for user in users:
+        print('db users table row is ', user)
+    user = table.find_one(username = payload['username'], password = payload['password'])
+    if user:
+        if 'chat_id' in user and user['chat_id']:
+            from api.jwt.main import encode
+            token = encode({'username': payload['username']})
+            table.update({
+                'username': payload['username'],
+                'token': token
+            }, ['username'])
+            return {'message': 'validAccount', 'token': token}
+        return {'message': 'invalidAccount'}
+    return {'message': 'userDoesntExist'}
+    # return user
 
 def signUp(payload, db):
     from functions.main import isIterable
@@ -22,10 +36,10 @@ def signUp(payload, db):
     # print('tableis ', )
     print('payload is ', payload)
     user = db.query(
-        'SELECT id FROM users WHERE email = :email OR login = :login', 
+        'SELECT id FROM users WHERE email = :email OR username = :username', 
         {
             'email': payload['email'],
-            'login': payload['login']
+            'username': payload['username']
         }
     )
 
@@ -34,10 +48,27 @@ def signUp(payload, db):
     else:
         table.insert({
             'email': payload['email'], 
-            'login': payload['login'],
-            'password': payload['password']
+            'username': payload['username'],
+            'password': payload['password'],
+            'chat_id': '',
+            'token': ''
         })
         return 'userRegistered'
-    
+
+def setChatIdAndToken(payload, db):
+    import requests
+    response = requests.get('https://api.telegram.org/bot1135448518:AAGS2SxWLmiqyDIm3cVQft4BGKHINxSw4So/getChat?chat_id=' + payload['chat_id'])
+    chatExist = response.json()['ok']
+    if chatExist:
+        from api.jwt.main import encode
+        table = db['users']
+        # setUserToken(payload['username'], table)
+        token = encode({'username': payload['username']})
+        table.update({
+            'username': payload['username'],
+            'chat_id': payload['chat_id'],
+            'token': token
+        }, ['username'])
+        return token
         
 

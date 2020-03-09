@@ -11,10 +11,10 @@ import json
 
 
 def Main(postData, handlerFilename, dbConfig, dynamicImportModule):
-    print('AJAX HANDLER', postData, 'FILENAME IS ', handlerFilename)
+    # print('AJAX HANDLER', postData, 'FILENAME IS ', handlerFilename)
     ajaxHandlersModulePath = 'server.request.ajax.handlers.'
     postData = json.loads(postData.getvalue('data'))
-    print('FAIL ',postData)
+    # print('FAIL ',postData)
     # x = {
     #     "name": "John",
     #     "age": 30,
@@ -31,8 +31,8 @@ def Main(postData, handlerFilename, dbConfig, dynamicImportModule):
     }
 
     resultData = dynamicImportModule(ajaxHandlersModulePath + handlerFilename, 'Main')(**kwargs)
-    print('resultData is ', resultData)
-    return json.dumps(resultData or 'false')
+    # print('resultData is ', resultData)
+    return json.dumps(resultData or '')
 
 # Ошибка скоупа
 # def doAction(actionName, kwargs):

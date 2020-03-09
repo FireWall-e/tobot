@@ -32,8 +32,8 @@ class Server(BaseHTTPRequestHandler):
     import cgi
     # content_len = int(self.headers.get('Content-Length'))
     # post_body = self.rfile.read(content_len)
-    print('HEADERS ARE', self.headers)
-    print('CONTENT TYPE RECEIVED',  self.headers['Content-Type'])
+    # print('HEADERS ARE', self.headers)
+    # print('CONTENT TYPE RECEIVED',  self.headers['Content-Type'])
     responseContentBytes = self.requestHandler.proceedRequest(
       requestPath = self.path,
       refererHeader = self.headers['Referer'],

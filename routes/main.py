@@ -3,8 +3,9 @@ Routes = {
     'name': 'index',
     'template': 'index.html' 
   },
-  '/goodbye': {
-    'template': 'goodbye.html'
+  '/todo': {
+    'name': 'todo',
+    'template': 'todo.py'
   },
   '/ajax': {
     'template': 'main.py'

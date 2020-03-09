@@ -5,11 +5,11 @@
         <meta charset="UTF-8">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <link rel="stylesheet" href="/assets/css/main.css">
-        <link rel="stylesheet" href="/assets/css/index/index.css">
+        <link rel="stylesheet" href="/assets/css/index/main.css">
         <!-- <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap&subset=cyrillic" rel="stylesheet">  -->
-        <link href="https://fonts.googleapis.com/css?family=Roboto:300&display=swap&subset=cyrillic" rel="stylesheet"> 
+        <!-- <link href="https://fonts.googleapis.com/css?family=Roboto:300&display=swap&subset=cyrillic" rel="stylesheet">  -->
         <!-- <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:300&display=swap&subset=cyrillic" rel="stylesheet"> -->
-        <script type="text/javascript" src="/assets/js/index/index.js"></script>
+        <script type="text/javascript" src="/assets/js/index/main.js"></script>
     </head>
     <body>
         <main class="main">
@@ -42,7 +42,7 @@
                             <h1 class="title">Sign in</h1>
                         </div>
                         <form action="" class="sign-in__form form">
-                            <input class="form__item" name="login" type="text" placeholder="Login" required>
+                            <input class="form__item" name="username" type="text" placeholder="Telegram Username" title="Without '@' sign" required>
                             <input class="form__item" name="password" type="password" placeholder="Password" required>
                             <button class="form__submit hover--zoom" type="submit" title="Submit" onclick="App.signIn.submitForm(event)">
                                 <i class="icon icon--submit"></i>
@@ -65,9 +65,9 @@
                     </div>
                     <form action="" class="sign-up__form form">
                         <input class="form__item" name="email" type="email" placeholder="Email" required>
-                        <input class="form__item" name="login" pattern="[a-zA-Z0-9]{3,33}" type="text" placeholder="Login" required>
-                        <input class="form__item" name="password" pattern="[a-zA-Z0-9]{6,33}" type="password" placeholder="Password" required>
-                        <input class="form__item" name="passwordRepeat" pattern="[a-zA-Z0-9]{6,33}" type="password" placeholder="Password Repeat" required>
+                        <input class="form__item" name="username" pattern="[a-zA-Z0-9_]{5,32}" type="text" placeholder="Telegram Username" title="Without '@' sign" required>
+                        <input class="form__item" name="password" pattern="[a-zA-Z0-9#%$&*^.,@>_<]{6,32}" type="password" placeholder="Password" required>
+                        <input class="form__item" name="passwordRepeat" pattern="[a-zA-Z0-9#%$&*^.,@>_<]{6,32}" type="password" placeholder="Password Repeat" required>
                         <button class="form__submit hover--zoom" type="submit" title="Submit" onclick="App.signUp.submitForm(event)">
                             <i class="icon icon--submit"></i>
                         </button>

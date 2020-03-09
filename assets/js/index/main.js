@@ -10,6 +10,7 @@ window.onload = () => {
                 if (clickToRemove) {
                     this.modal.style.cursor = 'pointer';
                     this.modal.addEventListener('click', this.modal.remove);
+                    this.modal.title = 'Click on me to close';
                 }
                 // if (content) this.addContent(content);
             };
@@ -42,7 +43,7 @@ window.onload = () => {
 
             this.remove = () => {
                 this.modal.remove();
-            }
+            };
         };
 
         const loading = function (container) {
@@ -80,9 +81,9 @@ window.onload = () => {
                 console.log('x is ', xhr);
               
                 if (options.success) {
-                    let response = JSON.parse(JSON.stringify(xhr.response));
-                    if (typeof response === 'string') response = response.replace(/"/g, '');
-                    options.success(response);
+                    // let response = JSON.parse(xhr.response);
+                    // if (typeof response === 'string') response = response.replace(/^"|"?$/g, '');
+                    options.success(JSON.parse(xhr.response));
                 }
             };
 
@@ -120,14 +121,24 @@ window.onload = () => {
             return string.replace(/"/g, '\\"');
         };
 
-
         const bindValidityMask = (form, targetSelector, message, focusAfter) => {
             const target = document.querySelector(targetSelector);
             if(focusAfter === 'keypress') {
-                document.addEventListener('keypress', function handler(e) {
+                
+                const keypressHandler = () => {
                     target.focus();
-                    e.currentTarget.removeEventListener(e.type, handler);
-                });
+                    e.currentTarget.removeEventListener(e.type, keypressHandler);
+                }
+                document.addEventListener('keypress', keypressHandler);
+                // console.log('IIIIIIIIIIIIIIIIIIIIII',form.getElementsByClassName('form__submit')[0]);
+                // form.getElementsByClassName('form__submit')[0].addEventListener('click', () => {
+                //     console.log('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP');
+                //     document.removeEventListener('keypress', keypressHandler);
+                // });
+                // form.addEventListener('submit', () => {
+                //     console.log('RRRRRRRRRRRRRRRRRRRRRRRRRRR');
+                //     document.removeEventListener('keypress', keypressHandler);
+                // });
             }
             const maskElementExist = document.querySelector('[data-mask-for-selector="' + escapeQuotes(targetSelector) + '"]');
             // console.log('maskElementExist is ', maskElementExist, 'escape(targetSelector)', escapeQuotes(targetSelector), 'pp', '[data-mask-for-selector="' + escapeQuotes(targetSelector) + '"]');
@@ -242,6 +253,10 @@ window.onload = () => {
 
             this.submitForm = (event) => {
                 const form = document.querySelector('.' + selector + '__form');
+                const container = document.querySelector('.content');
+                const loadingSpin = new loading(container);
+                      loadingSpin.start();
+                      console.log('SUBMIT');
                 proceedForm(event, form, {
                     onvalid: (formData) => {
                         console.log('VALID');
@@ -250,14 +265,105 @@ window.onload = () => {
                             data: {
                                 doAction: 'signIn',
                                 payload: {
-                                    login: formData.login,
+                                    username: formData.username,
                                     password: formData.password
                                 } 
                             },
                             success: (response) => {
-                                console.log('sign-in result is ', response)
-                            }
+                                const responseModal = new modal();
+                                      responseModal.create('sign-in-modal', true);
+                            console.log('sign-in resp is ', typeof response, response);
+                                if (response.message === 'validAccount') {
+                                    // loadingSpin.end();
+                                    localStorage.setItem('token', response.token);
+                                    window.location.replace('/todo');
+                                    console.log('REDIRECT');
+                                }
+                                else if (response.message === 'userDoesntExist') {
+                                  
+                                    responseModal.addContent(`
+                                        User with such account data doesnt exist!
+                                    `);
+                                    responseModal.pushIn(container);
+                                }
+                                else if (response.message === 'invalidAccount') {
+                                    // loadingSpin.start();
+                                    post({
+                                        url: 'https://api.telegram.org/bot1135448518:AAGS2SxWLmiqyDIm3cVQft4BGKHINxSw4So/getUpdates',
+                                        success: (response) => {
+                                            console.log('telegram repsonse is ', response);
+                                            if (response.result.length) {
+                                                const messageItem = response.result.find(messageItem => messageItem.message.from.username === formData.username);
+                                                console.log('message is ', messageItem);
+                                                if (messageItem) {
+                                                    post({
+                                                        url: 'ajax',
+                                                        data: {
+                                                            doAction: 'setChatIdAndToken',
+                                                            payload: {
+                                                                username: formData.username,
+                                                                chat_id: messageItem.message.chat.id.toString()
+                                                            }
+                                                        },
+                                                        success: (token) => {
+                                                            // token goes here
+                                                            if (token) {
+                                                                localStorage.setItem('token', token);
+                                                                window.location.replace('/todo');
+                                                                return;
+                                                            }
+                                                            responseModal.addContent(`
+                                                                An error occured, please try again later :(
+                                                            `);
+                                                            responseModal.pushIn(container);
+                                                        },
+                                                        fail: () => {
+                                                            responseModal.addContent(`
+                                                                Sorry, service temporary unavailable :(
+                                                            `);
+                                                            responseModal.pushIn(container);
+                                                        },
+                                                        always: () => {
+                                                            loadingSpin.end();
+                                                           
+                                                        }
+                                                    });
+                                                    return;
+                                                }
+                                            }
+                                            // else {
+                                                
+                                            // }
+                                            loadingSpin.end();
+                                            responseModal.addContent(`
+                                                Please make a friendship with <a href="https://telegram.me/pros_tobot?start" target="_blank title="I am available 24/7"> Tobot</a> :)
+                                            `);
+                                            responseModal.pushIn(container);
+                                        },
+                                        fail: () => {
+                                            loadingSpin.end();
+                                            responseModal.addContent(`
+                                                Sorry, telegram's service temporary unavailable :(
+                                            `);
+                                            responseModal.pushIn(container);
+                                        },
+                                        always: () => {
+                                            
+                                        }
+                                    });
+                                    return;
+                                    // responseModal.pushIn(container);
+                                }
+                                loadingSpin.end();
+                                form.reset();
+                            },
+                            // always: () => {
+                                // loadingSpin.end();
+                            // }
                         });
+                    },
+                    oninvalid: () => {
+                        loadingSpin.end();
                     }
                 });
                 // console.log('sign-in data is ', formData);
@@ -268,6 +374,7 @@ window.onload = () => {
             const selector = 'sign-up';
             const validatePasswords = (formData, passwordRepeatMask) => {
                 // console.log('formData.password ', formData.password, 'formData.passwordRepeat', formData.passwordRepeat);
+              
                 if(formData.password !== formData.passwordRepeat) { 
                     console.log('INVALID', formData.password, formData.passwordRepeat);
                     passwordRepeatMask.reportValidity();
@@ -282,7 +389,7 @@ window.onload = () => {
             this.hideForm = hideSlide(selector);
 
             this.submitForm = (event) => {
-                // event.preventDefault();
+                
                 const container = document.querySelector('.content');
                 const loadingSpin = new loading(container);
                       loadingSpin.start();
@@ -297,7 +404,7 @@ window.onload = () => {
                             form, 
                             'input[name="passwordRepeat"]',
                             'Passwords should be identical!',
-                            'keypress'
+                            'timeout'
                         );
                         // console.log('form is valid', validatePasswords(formData, passwordRepeatMask));
                         return validatePasswords(formData, passwordRepeatMask);
@@ -305,22 +412,25 @@ window.onload = () => {
                     },
                     onvalid:  (formData) => {
                         console.log('VALID', formData);
+                        // document.removeEventListener('keypress', keypressHandler);
+                        // getEventListeners(window)["keypress"][index];
+                        // document.removeEventListener('keypress', keypressHandler);
                         post({
                             url: '/ajax',
                             data: {
                                 doAction: 'signUp',
                                 payload: {
                                     email: formData.email,
-                                    login: formData.login,
+                                    username: formData.username,
                                     password: formData.password
                                 }
                             },
                             success: (response) => {
-                                console.log('signUp result is ', response, response.replace(/"/g, ''), typeof response.replace(/"/g, ''));
+                                // console.log('signUp result is ', response, response.replace(/"/g, ''), typeof response.replace(/"/g, ''));
                                 const responseModal = new modal();
                                       responseModal.create('sign-up-modal', true);
                                 if (response === 'userExists') {
-                                    console.log('IIIIIIIIIIIIIIIIIIIIIIIII22');
+                                    // console.log('IIIIIIIIIIIIIIIIIIIIIIIII22');
                                     responseModal.addContent(`
                                         <div class="modal__item">
                                             User already exists!
@@ -328,23 +438,27 @@ window.onload = () => {
                                     `);
                                 }
                                 else if (response === 'userRegistered') {
-                                    console.log('IIIIIIIIIIIIIIIIIIIIIIIII11');
+                                    // console.log('IIIIIIIIIIIIIIIIIIIIIIIII11');
                                     responseModal.addContent(`
                                         <div class="modal__item">
-                                            Registration completed!
+                                            Registration completed! <br/>
+                                            Just one more step left! <br/>
+                                            Folow this link to setup your <a href="https://telegram.me/pros_tobot?start" target="_blank title="Click on me to start our friendship">Tobot</a> :)
                                         </div>
                                     `);
                                 }
                                 console.log('LLLLLLLLLLLL', responseModal);
                                 responseModal.pushIn(container);
+                                form.reset();
                             },
-                            always: (response) => {
-                                console.log('RRRRR', response);
+                            always: () => {
+                                // console.log('RRRRR', response);
                                 loadingSpin.end();
                             }
                         });
                     },
                     oninvalid: () => {
+                        // document.removeEventListener('keypress', keypressHandler);
                         loadingSpin.end();
                     }
                     // always: () => {

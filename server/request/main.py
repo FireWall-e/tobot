@@ -52,6 +52,9 @@ class RequestHandler():
             },
             'svg': {
                 'content-type': 'image/svg+xml'
+            },
+            'gif': {
+                'content-type': 'image/gif'
             }
         },
         'private': {
@@ -86,7 +89,7 @@ class RequestHandler():
     def pathExtractExtension(self, path):
         import os
         from urllib.parse import urlparse
-        print('RECEIVED PATH  ', path)             #[0] - названия файла
+        # print('RECEIVED PATH  ', path)             #[0] - названия файла
         return os.path.splitext(urlparse(path).path)[1][1:] # skip dot
 
     def pathExtractParams(self, path):
@@ -116,7 +119,7 @@ class RequestHandler():
     def proceedRequest(self, requestPath = False, refererHeader = False, postData = False):
         barePath = self.pathExtractBare(requestPath) # Trim request parameters
         requestExtension = self.pathExtractExtension(barePath)
-        print('!!!!REFERER!!!!', self.pathExtractBare(refererHeader))
+        # print('!!!!REFERER!!!!', self.pathExtractBare(refererHeader))
         # print('refererHeader  is ', )
         # Forecast defaults
         # self.staticRequest = True
@@ -162,14 +165,18 @@ class RequestHandler():
                     data = dynamicImport(self.config['ajax']['module-path'] + requestFileName, 'Main')(**kwargs)
                     # self.contentType = data['content-type']
                     # data = getattr(data, 'init')
-                    print('^^^^^^^^^^^^^^^^^^^^^^^^')
+                    # print('^^^^^^^^^^^^^^^^^^^^^^^^')
                 else:
                     # fileToRespond = self.config['template']['directory-path'] + Routes[requestPath]['template']
                     self.contentType = self.requestConfig['private'][requestExtension]['content-type']
-                    data = dynamicImport(self.config['template']['module-path'] + requestFileName, 'Main')(requestParams = self.pathExtractParams(requestPath))
+                    kwargs = {
+                        'requestParams': self.pathExtractParams(requestPath),
+                        'dbConfig': self.config['database']
+                    }
+                    data = dynamicImport(self.config['template']['module-path'] + requestFileName, 'Main')(**kwargs)
                     
                     # data = 'awdawd'
-                print('############', data)
+                # print('############', data)
                 # wow.kek(wow)
 
                 # Тут нужно динамично подключить файл, и засетить контент заголовок
@@ -177,7 +184,7 @@ class RequestHandler():
             else: # ассетсы или html
                 self.contentType = self.requestConfig['public'][requestExtension]['content-type']
         else: # invalid request
-            print('REQUEST IS FALSE ')
+            # print('REQUEST IS FALSE ')
             self.status = 404
             fileToRespond = self.config['template']['directory-path'] + Routes['404']['template']
             requestExtension =  self.pathExtractExtension(fileToRespond)

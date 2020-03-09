@@ -14,3 +14,7 @@ def findProperty(dictionary, propertiesVector, returnValueIfTrue = False):
 
 def isIterable(iterator):
     return any(True for _ in iterator)
+
+def getMilliseconds():
+    import time
+    return int(round(time.time() * 1000))
