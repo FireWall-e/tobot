@@ -1,44 +1,40 @@
 ## -*- coding: utf-8 -*-
-
+# Содержит роуты всего сайта, т.е. конфиг с данными для какого запроса какой файл вызывать
 from routes.main import Routes
 
+# Собственно сам обработчик запросов
 class RequestHandler():
-    # def __init__(self):
-    # def __init__(self):
-    #     super().__init__()
-    # contentType = ""
-    # contents = False
+
+    # Главная конфигурационная переменная
     config = {
         'char-encoding': 'UTF-8',
         'database': {
-            # 'name': 
-            # 'driver': 'sqlite',
-            # 'url': 'sqlite:///database/tobot.db',
             'url': 'sqlite:///database/tobot.db'
         },
-        'ajax': {
+        'ajax': { # Конфиг для ajax запросов
             'file-path': '/server/request/ajax/',
             'module-path': 'server.request.ajax.',
             'file-name': 'main'
         },
-        'template': {
+        'template': { # Конфиг с путями для шаблонов статический страниц (html) и страниц с данными сервера (модулями) (py)
             'directory-path': '/templates/',
             'module-path': 'templates.py.'
         }
     }
-#'template-path'
+
+    # Конфиг запросов, содержащий обрабатываемые (разрешенные) сервером типы контента
+    # public - доступны для прямого доступа через адресную строку
+    # private - предварительно обрабатываются сервером
+    # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type
     requestConfig = {
         'public': {
             'html': {
-                # 'path': '/templates/',
                 'content-type': 'text/html'
             },
             'js': {
-                # 'path': 'assets/js',
                 'content-type': 'text/javascript'
             },
             'css': {
-                # 'path': 'assets/css',
                 'content-type': 'text/css'
             },
             'png': {
@@ -71,137 +67,118 @@ class RequestHandler():
         
     }
 
-    # inrequestConfig = {
-    #     'content-type': 'text/html',
-    #     'template': '404.html'
-    # }
-
-    # def setStatus(self, status):
-    #     self.status = status
-
-    # def setContentType(self, contentType):
-    #     self.contentType = contentType
-
+    # Функция, которая проверяет существует ли файл по указанному пути requestPath,
+    # точка сообщает, что путь от корня - tobot/
     def doesFileExist(self, requestPath):
         from pathlib import Path
         return Path('.' + requestPath).is_file()
 
+    # Функция для получения расширения файла,
+    # то есть для something.exe, вернет exe [1] (без точки [1:])
     def pathExtractExtension(self, path):
         import os
         from urllib.parse import urlparse
-        # print('RECEIVED PATH  ', path)             #[0] - названия файла
-        return os.path.splitext(urlparse(path).path)[1][1:] # skip dot
+        
+        return os.path.splitext(urlparse(path).path)[1][1:]
 
+
+    # Возвращает параметры запроса типа dictionary,
+    # т.е. для запроса localhost/todo?id=123456789
+    # должно вернуть {'id': '123456789'}
     def pathExtractParams(self, path):
         import urllib.parse as urlparse
         from urllib.parse import parse_qs
         
         return parse_qs(urlparse.urlparse(path).query)
 
+    # Извлекает "чистый" запрашиваемый путь из ссылки
+    # Например,  для запроса localhost/todo?id=123456789
+    # должна вернуть /todo
     def pathExtractBare(self, path):
         import urllib.parse as urlparse
 
         return urlparse.urlparse(path).path
 
+    # Возвращает имя файла
+    # Например, для something.exe вернет something
     def fileExtractName(self, filename):
         return filename.split('.')[0]
 
-    
-
-    # def fileExtractName(self, name):
-    #     return return os.path.splitext()
-
-    # def proceedPostRequest(self, form):
-    #     data = self.dynamicImport(self.config['ajax']['module-path'] + requestFileName, 'Main')(self.requestConfig['private'])
-    #     self.contentType = data['content-type']
-
-
+    # Функция обработки запроса
     def proceedRequest(self, requestPath = False, refererHeader = False, postData = False):
-        barePath = self.pathExtractBare(requestPath) # Trim request parameters
+        # Извлекаем "чистый" путь запроса
+        barePath = self.pathExtractBare(requestPath)
+        # Получаем расширение запрашиваемого файла (если оно есть)
         requestExtension = self.pathExtractExtension(barePath)
-        # print('!!!!REFERER!!!!', self.pathExtractBare(refererHeader))
-        # print('refererHeader  is ', )
-        # Forecast defaults
-        # self.staticRequest = True
+        # Например, для localhost/assets/css/main.css получим
+        # barePath - localhost/assets/css/main.css 
+        # requestExtension - css
+        ##########################################################
+
+        # По дефолту выставляем код успешного ответа - 200
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
         self.status = 200
         
-    
-        # print('Wwwwww', self.doesFileExist('./assets/css/index.css'))
-        # print('isVR requestPath is ', requestPath, 'requestExtension is ', requestExtension)
-        # print('requestExtension and self.doesFileExist(requestPath)', requestExtension and self.doesFileExist(requestPath),
-        # 'requestExtension in self.requestConfig.keys()', requestExtension in self.requestConfig['public'].keys()
-        # )
+        # Если запрашивается файл, то бишь есть запрашиваемое расширение и файл существует физически
+        # а также является public (публично доступным)
+        # то выполняется данное условие
         if ( requestExtension and self.doesFileExist(barePath) and 
              requestExtension in self.requestConfig['public'].keys()
-           ):  # file request
+           ):
+            # В переменную возвращаемого файла записываем "чистый путь"
+            # по которому сервер позже обратится за данными
             fileToRespond = barePath
+            # Записываем соответствующий расширению тип контента
             self.contentType = self.requestConfig['public'][requestExtension]['content-type']
-        elif barePath in Routes: # directory request
+        elif barePath in Routes: # Если запрашиваемый путь существует в роутах то выполняется условие
+            # К конфигу с путем для шаблонов дописываем имя файла из конфига роутов
+            # и получаем полноценный путь к файлу, к которому сервер позже обратится за данными
             fileToRespond = self.config['template']['directory-path'] + Routes[barePath]['template']
-
-            # if not self.doesFileExist(fileToRespond):
-            #     fileToRespond = self.config['template-path'] + Routes['page-in-progress']['template']
+            # Вытаскиваем расширение по нашему ранее полученному пути fileToRespond
             requestExtension =  self.pathExtractExtension(fileToRespond)
-
+            # Если это файлик питона с расширением .py, то
             if requestExtension == 'py':
-                '''
-                Заголовки будут определяться самим включенным файлом
-                '''
+                # Из функция текущего проекта импортируем одну для динамического импорта и одну для поиска
+                # свойства в объекте со вложенностями
                 from functions.main import dynamicImport, findProperty
-                # self.staticRequest = False
+                # Вытаскиваем имя файла без расширения
                 requestFileName = self.fileExtractName(Routes[barePath]['template'])
-           
+                # Проверяем, если имя соответствует имени при AJAX POST запросе
                 if requestFileName == self.config['ajax']['file-name']:
-                    # fileToRespond = self.config['ajax']['ajax-path'] + Routes[requestPath]['template']
+                    # Записываем приватные заголовки возвращаемого контанта
+                    # Для AJAX запроса - это json строка с объектом
                     self.contentType = self.requestConfig['private']['json']['content-type']
+                    # Для удобства создаем словарь аргументов функции
                     kwargs = {
-                        'postData': postData,
-                        'handlerFilename': findProperty(Routes, [self.pathExtractBare(refererHeader), 'name'], True) or 'default',
-                        'dynamicImportModule': dynamicImport,
-                        'dbConfig': self.config['database']
+                        'postData': postData, # Записываем данные полученные с cgi.FieldStorage
+                        'handlerFilename': findProperty(Routes, [self.pathExtractBare(refererHeader), 'name'], True) or 'default', # Если в роутах указано имя файла (name) для обработки AJAX запросов, то присваиваем его, в противном случае файл обработки - default.py
+                        'dynamicImportModule': dynamicImport, # Записываем модуль динамического импорта
+                        'dbConfig': self.config['database'] # Передаем "ссылку" на БД https://dataset.readthedocs.io/en/latest/api.html#connecting
                     }
-                    # data = dynamicImport(self.config['ajax']['module-path'] + requestFileName, 'Main') \
-                    # (postData, handlerFilename = findProperty(Routes, [self.pathExtractBare(refererHeader), 'name'], True) or 'default', dynamicImportModule = dynamicImport)
+                    # Получаем данные из динамически подключаемого файла 
+                    # (сразу же вызываем функцию Main внутри него) и передаем все аргументы kwargs
                     data = dynamicImport(self.config['ajax']['module-path'] + requestFileName, 'Main')(**kwargs)
-                    # self.contentType = data['content-type']
-                    # data = getattr(data, 'init')
-                    # print('^^^^^^^^^^^^^^^^^^^^^^^^')
                 else:
-                    # fileToRespond = self.config['template']['directory-path'] + Routes[requestPath]['template']
+                    # Записываем заголовки
                     self.contentType = self.requestConfig['private'][requestExtension]['content-type']
+                    # Аргументы
                     kwargs = {
-                        'requestParams': self.pathExtractParams(requestPath),
+                        'requestParams': self.pathExtractParams(requestPath), # Передаем запрашиваемыу параметры типа dictionary (словарь)
                         'dbConfig': self.config['database']
                     }
                     data = dynamicImport(self.config['template']['module-path'] + requestFileName, 'Main')(**kwargs)
-                    
-                    # data = 'awdawd'
-                # print('############', data)
-                # wow.kek(wow)
-
-                # Тут нужно динамично подключить файл, и засетить контент заголовок
+                # Возвращаем информацию в виде набора байтов с кодировкой (UTF-8)
                 return bytes(data, self.config['char-encoding'])
-            else: # ассетсы или html
+            else: 
+                # Заголовки статики (html, css, js, изображения и прочее)
                 self.contentType = self.requestConfig['public'][requestExtension]['content-type']
-        else: # invalid request
-            # print('REQUEST IS FALSE ')
+        else: 
+            # Запрос не удалось обработать - 404 код ответа
             self.status = 404
+            # Возвращаем страницу 404.html
             fileToRespond = self.config['template']['directory-path'] + Routes['404']['template']
             requestExtension =  self.pathExtractExtension(fileToRespond)
             self.contentType = self.requestConfig['public'][requestExtension]['content-type']
-        # Static include
+        # Также возвращаем байты
         with open(fileToRespond[1:], 'rb') as file:
             return bytes(file.read())
-        
-
-
-
-
-    # def getContents(self):
-    #     return self.contents
-
-    # def getStatus(self):
-    #     return self.status
-
-    # def getContentType(self):
-    #     return self.contentType

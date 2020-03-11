@@ -1,17 +1,27 @@
 def Main(dbConfig, requestParams):
-    return renderTodoPage(dbConfig, requestParams['id'][0]) if 'id' in requestParams else renderTodosPage(dbConfig)
+    # Если в адресной строке присуствует параметр запроса id (?id=) то рендерим страницу 1 todo,
+    # в противном случае рендерим страницу со всеми todo
+    return renderTodoPage(dbConfig, requestParams['id'][0]) if 'id' in requestParams else renderTodosPage()
 
+# Рендерим страницу единичной todo (запрос по ?id=) 
 def renderTodoPage(dbConfig, todoId):
     from functions.main import getDateMilliseconds
-    print('OK', getDateMilliseconds(), todoId)
+
+    # Вытаскиваем данные todo по id из БД
     todo = getTodo(dbConfig, todoId)
 
+    # Дефолтные параметры
     date = ''
     time = ''
+
+    # Если у записи есть дата напоминания - строка вида '[дата] [время]', то разбиваем 
+    # на соответствующие отдельные переменные
     if todo['remind_at']:
         dateTime = todo['remind_at'].split(' ')
         date = dateTime[0]
         time = dateTime[1]
+
+    # html строка нашего todo
     todoHTML = \
         """
             <div class="todo page">
@@ -28,12 +38,14 @@ def renderTodoPage(dbConfig, todoId):
                 </div>
             </div>
         """\
-        .format(
+        .format( # Подставляем данные в строку по соответствующим ключам (placeholders) {}
             title = todo['title'],
             text = todo['text'],
             date = date,
             time = time
         ) 
+
+    # Возвращаем html полноценной страницы с подстановной переменных в {}, как ранее
     return """
         <!DOCTYPE html>
         <html lang="en">
@@ -76,6 +88,7 @@ def renderTodoPage(dbConfig, todoId):
         serverTimeMS = getDateMilliseconds()
     )
 
+# Вытаскиваем данные todo по ее id из БД
 def getTodo(dbConfig, todoId):
     import dataset
     db = dataset.connect(dbConfig['url'])
@@ -83,12 +96,10 @@ def getTodo(dbConfig, todoId):
     todo = table.find_one(todo_id = todoId)
     return todo
 
-def renderTodosPage(dbConfig):
+# Рендерим страницу со всеми todo
+def renderTodosPage():
     from functions.main import getDateMilliseconds
 
-    todos = getTodos(dbConfig)
-    todosHTML = renderItems(todos)
-    containerClass = ' empty' if not todosHTML else ''
     return \
     """
         <!DOCTYPE html>
@@ -112,8 +123,8 @@ def renderTodosPage(dbConfig):
                         <button class="panel__item hover--zoom" title="Add todo" onclick="App.todo.add();"><i class="icon icon--add-todo"></i></button>
                         <button class="panel__item hover--zoom" title="Delete all todos" onclick="App.todo.deleteAll();"><i class="icon icon--delete-todos"></i></button>
                     </div>
-                    <div class="container{containerClass}">
-                        <div class="todos page">{todosHTML}</div>
+                    <div class="container empty">
+                        <div class="todos page"></div>
                     </div>
                 </section>
                 <div class="modal show loading">
@@ -123,45 +134,7 @@ def renderTodosPage(dbConfig):
         </body>
         </html>
     """\
-    .format(
-        containerClass = containerClass,
-        todosHTML = todosHTML,
+    .format( # Записываем переменную непосредственно в константу JavaScriptб для дальнейшего учета времени на стороне клиента (в браузере)
         serverTimeMS = getDateMilliseconds()
     )
-
-def getTodos(dbConfig):
-    import dataset
-    db = dataset.connect(dbConfig['url'])
-    table = db['todos']
-    # print('todos are ', )
-    return table.all()
-
-def renderItems(todos):
-    html = ''
-    for todo in todos:
-        print('todo is ', todo)
-        html += \
-        """
-            <div class="todo">
-                <span class="todo__item title">{title}</span>
-                <span class="todo__item text">{text}</span>
-                <div class="todo__item">
-                    <div class="todo__column remind">
-                        <span class="label">Remind at:</span>
-                        <span class="date">{remindAt}</span>
-                    </div>
-                    <div class="todo__column buttons">
-                        <button class="todo__edit todo-button hover--zoom" title="Edit todo" onclick="App.todo.edit({todoId});"><i class="icon icon--edit-todo"></i></button>
-                        <button class="todo__delete todo-button hover--zoom" title="Delete todo" onclick="App.todo.delete({todoId});"><i class="icon icon--delete-todo"></i></button>
-                    </div>
-                </div>
-            </div>
-        """\
-        .format(
-            todoId = todo['todo_id'],
-            title = todo['title'],
-            text = todo['text'],
-            remindAt = todo['remind_at']
-        )
-    return html
     

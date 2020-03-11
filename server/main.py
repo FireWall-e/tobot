@@ -1,39 +1,42 @@
 from http.server import BaseHTTPRequestHandler
-# from pathlib import Path
-# from routes.main import Routes
 from server.request.main import RequestHandler
 
 class Server(BaseHTTPRequestHandler):
+  # Инициализируем обработчик запросов
   requestHandler = RequestHandler()
 
+  # Нижеприведенные методы с приставкой do_ автоматически вызываются при соответствующем типе запроса
+  # Например, если на сервер поступил GET запрос, то вызовется функция do_GET, аналогично для остальных
+  # https://developer.mozilla.org/ru/docs/Web/HTTP/Methods/
+
+  # Обработчик HEAD запросов
   def do_HEAD(self):
-    # https://developer.mozilla.org/ru/docs/Web/HTTP/Methods/HEAD
+    # Обрабатываем запрос передавая запрашиваемый путь, например, для ссылки вида localhost/todo?id=123456789
+    # запрашиваемым путем будет - /todo?id=123456789, а параметром - id со значением 123456789
     self.requestHandler.proceedRequest(requestPath = self.path)
+    # Отправляем заголовки клиенту
     self.send_response(self.requestHandler.status)
+    # Отправляем заголовок типа возвращаемого контента
+    # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type
     self.send_header("Content-type", self.requestHandler.contentType)
+    # Сообщаем, что все заголовки необходимые заголовки переданы
     self.end_headers()
-    
+  
+  # Обработчик GET запросов
   def do_GET(self):
- 
-    # valid_request = self.RH.isValidRequest(self.path)
- 
-    # print('valid request is ', valid_request)
-    # print('COMMAND IS ', self.command)
-    # file_extension = 
-    # print('file extension is ', file_extension)
-    # print('.headers.get is ', self.headers)
+    # Обрабатываем запрос и записываем полученные данные в переменную
     responseContentBytes = self.requestHandler.proceedRequest(requestPath = self.path)
-    # self.send_response(self.requestHandler.status)
-    # self.send_header("Content-type", self.requestHandler.contentType)
-    # self.end_headers()
+    # Передаем данные в функцию, которая непосредственно отдает данные клиенту
     self.respond(responseContentBytes)
-    
+  
+  # Обработчик POST запросов
   def do_POST(self):
+    # Библиотека cgi необходима для получения тела POST запроса от клиента
     import cgi
-    # content_len = int(self.headers.get('Content-Length'))
-    # post_body = self.rfile.read(content_len)
-    # print('HEADERS ARE', self.headers)
-    # print('CONTENT TYPE RECEIVED',  self.headers['Content-Type'])
+    # Обрабатываем запрос, передавая запрашиваемый путь, 
+    # относительный адрес от которой пришел запрос (например, для localhost - это '/')
+    # и непосредственно сами данные postData, полученные при вызове cgi метода FieldStorage
+    # о его аргументах можно прочесть в соотв. документации
     responseContentBytes = self.requestHandler.proceedRequest(
       requestPath = self.path,
       refererHeader = self.headers['Referer'],
@@ -46,23 +49,14 @@ class Server(BaseHTTPRequestHandler):
         }
       )
     )
-   
-    # print( form, form.getvalue('test'))
+    # Передаем данные в функцию, которая непосредственно отдает данные клиенту
     self.respond(responseContentBytes)
-    
-  # def handle_http(self):
-  #   self.send_response(self.requestHandler.status)
-  #   self.send_header('Content-type', self.requestHandler.contentType)
-  #   self.end_headers()
-  #   response_content = open(self.requestHandler.fileToRespond[1:]).read()
-
-  #   print('response content is ', response_content)
-  #   return bytes(response_content, 'UTF-8')
-    
+  
+  # Функция, которая отдает клиенту заголовки и обработанные сервером данные
   def respond(self, responseContentBytes):
-    # content = self.handle_http()
+    # Отдаем заголовки
     self.send_response(self.requestHandler.status)
     self.send_header("Content-type", self.requestHandler.contentType)
     self.end_headers()
+    # Отдаем данные
     self.wfile.write(responseContentBytes)
-    # self.wfile.close()

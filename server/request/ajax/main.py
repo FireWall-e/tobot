@@ -1,14 +1,4 @@
-# class Main():
-#     def init(self):
-#         return 25
-
-# def init():
-#     return 33
-# import sys
 import json
-
-# signUp()
-
 
 def Main(postData, handlerFilename, dbConfig, dynamicImportModule):
     # print('AJAX HANDLER', postData, 'FILENAME IS ', handlerFilename)

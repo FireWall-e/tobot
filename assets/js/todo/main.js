@@ -159,12 +159,61 @@ window.onload = () => {
                 window.location.reload(true);
             };
 
-            this.delete = (todoId) => {
+            this.delete = (todoId, todosPage) => {
                 loading.start('.container');
+                post({
+                    url: '/ajax',
+                    data: {
+                        doAction: 'delete',
+                        payload: {
+                            token: localStorage.getItem('token'),
+                            todoId: todoId
+                        }
+                    },
+                    success: (response) => {
+                        // console.log('response is ', response);return;
+                        if (response) {
+                            if (todosPage) {
+                                document.querySelector(`[data-id="${todoId}"]`).remove();
+                                if (!(document.querySelector('.todos') || {}).innerText) {
+                                    document.querySelector('.container').classList.add('empty');
+                                }
+                                return;
+                            }
+                            window.location.replace('/todo');
+                            return;
+                        }
+                        window.location.replace('/');
+                    },
+                    always: (response) => {
+                        loading.end();
+                    }
+                });
             };
 
             this.deleteAll = () => {
-
+                loading.start('.container');
+                post({
+                    url: '/ajax',
+                    data: {
+                        doAction: 'deleteAll',
+                        payload: {
+                            token: localStorage.getItem('token')
+                        }
+                    },
+                    success: (response) => {
+                        console.log('delete all response is ', response);
+                        if (response) {
+                            document.querySelector('.container').classList.add('empty');
+                            document.querySelector('.todos').innerText = '';
+                            return;
+                        }
+                        window.location.replace('/');
+                    },
+                    always: () => {
+                        loading.end();
+                    }
+                });
             };
 
             this.add = () => {
@@ -182,19 +231,20 @@ window.onload = () => {
                     success: (rowId) => {
                         console.log('response is ', rowId);
                         if (rowId) {
+                            document.querySelector('.container').classList.remove('empty');
                             const todos = document.querySelector('.todos');
                             todos.insertAdjacentHTML('afterbegin', `
-                                <div class="todo">
+                                <div class="todo" data-id="${todoId}">
                                     <span class="todo__item title"></span>
                                     <span class="todo__item text"></span>
                                     <div class="todo__item">
-                                        <div class="todo__column remind">
+                                        <div class="todo__column remind" title="Time when you will be notified">
                                             <span class="label">Remind at:</span>
                                             <span class="date"></span>
                                         </div>
                                         <div class="todo__column buttons">
                                             <button class="todo__edit todo-button hover--zoom" title="Edit todo" onclick="App.todo.edit(${todoId});"><i class="icon icon--edit-todo"></i></button>
-                                            <button class="todo__delete todo-button hover--zoom" title="Delete todo" onclick="App.todo.delete(${todoId});"><i class="icon icon--delete-todo"></i></button>
+                                            <button class="todo__delete todo-button hover--zoom" title="Delete todo" onclick="App.todo.delete(${todoId}, true);"><i class="icon icon--delete-todo"></i></button>
                                         </div>
                                     </div>
                                 </div>
@@ -224,15 +274,19 @@ window.onload = () => {
                             token: token
                         }
                     },
-                    always: (tokenIsValid) => {
-                        console.log('token is valid', tokenIsValid, typeof tokenIsValid);
-                        if (!tokenIsValid) { 
+                    always: (response) => {
+                        if (response === 'invalidToken') { 
                             window.location.replace('/');
                         }
                         else {
+                            if (response) {
+                                document.querySelector('.container').classList.remove('empty');
+                                if (!document.querySelector('.todos').innerHTML && !document.querySelector('.todos').innerText) {
+                                    document.querySelector('.todos').innerHTML = response;
+                                }
+                            }
                             document.querySelector('.modal.loading').remove();
                         }
-                        // remove loading modal
                     }
                 });
             }

@@ -7,12 +7,6 @@ def Main(actionName, payload, dbConfig):
     # return doAction(actionName, {'payload': payload, 'db': db})
     return globals()[actionName](payload, db)
 
-def verifyUserToken(payload, _):
-    from api.jwt.main import decode
-    encryptedPayload = decode(payload['token'])
-    # print('token is ', ecryptedPayload)
-    return 'true' if encryptedPayload else ''
-
 def create(payload, db):
     from api.jwt.main import decode
     username = decode(payload['token'])['username']
@@ -30,6 +24,36 @@ def create(payload, db):
         print('db todos table row is ', todo)
     # print('rowid is ', rowId)
     return rowId if rowId else ''
+
+def delete(payload, db):
+    from api.jwt.main import decode
+
+    username = decode(payload['token'])['username']
+    if username:
+        from functions.main import executeCommand
+
+        executeCommand('schtasks /delete /tn "Remind{todoId}" /f > nul 2> nul'.format(todoId = payload['todoId']))
+        table = db['todos']
+        
+        return table.delete(username = username, todo_id = payload['todoId'])
+    return ''
+
+def deleteAll(payload, db):
+    from api.jwt.main import decode
+    print('payload is ', payload)
+    username = decode(payload['token'])['username']
+ 
+    if username:
+        from functions.main import executeCommand
+
+        table = db['todos']
+        todos = table.find(username = username)
+
+        for todo in todos:
+            executeCommand('schtasks /delete /tn "Remind{todoId}" /f > nul 2> nul'.format(todoId = todo['todo_id']))
+
+        return table.delete(username = username)
+    return ''
 
 def save(payload, db):
     tableTodos = db['todos']
@@ -86,8 +110,8 @@ def save(payload, db):
                 chatId = '--chat_id {chatId}'.format(chatId = user['chat_id']),
                 message = '--message \\"Hi, @{username}! Please dont forget about {link}'.format(
                     username = username,
-                    link = '[{title}](http://127.0.0.1:80/todo?id={todoId}) todo. Have a nice day ! :)\\"'.format(
-                        title = payload['title'],
+                    link = '[{title}](http://127.0.0.1:80/todo?id={todoId})! :)\\"'.format(
+                        title = payload['title'] or 'none',
                         todoId = payload['todoId']
                     )
                 ),
@@ -106,3 +130,49 @@ def save(payload, db):
         # print('command is ', command)
         # execute command
     return tableTodos.update(updateData, ['todo_id'])
+
+def verifyUserToken(payload, db):
+    from api.jwt.main import decode
+    username = decode(payload['token'])['username']
+    # print('token is ', ecryptedPayload)
+    # print(encryptedPayload is )
+    if not username:
+        return 'invalidToken'
+    # print('todos are ', getTodos(username, db))
+    todos = getTodos(username, db)
+    return renderItems(todos)
+
+def getTodos(username, db):
+    return db.query(
+        'SELECT * FROM todos WHERE username = :username ORDER BY id DESC', 
+        { 'username': username }
+    )
+
+def renderItems(todos):
+    html = ''
+    for todo in todos:
+        print('todo is ', todo)
+        html += \
+        """
+            <div class="todo" data-id="{todoId}">
+                <span class="todo__item title">{title}</span>
+                <span class="todo__item text">{text}</span>
+                <div class="todo__item">
+                    <div class="todo__column remind" title="Time when you will be notified">
+                        <span class="label">Remind at:</span>
+                        <span class="date">{remindAt}</span>
+                    </div>
+                    <div class="todo__column buttons">
+                        <button class="todo__edit todo-button hover--zoom" title="Edit todo" onclick="App.todo.edit({todoId});"><i class="icon icon--edit-todo"></i></button>
+                        <button class="todo__delete todo-button hover--zoom" title="Delete todo" onclick="App.todo.delete({todoId}, true);"><i class="icon icon--delete-todo"></i></button>
+                    </div>
+                </div>
+            </div>
+        """\
+        .format(
+            todoId = todo['todo_id'],
+            title = todo['title'],
+            text = todo['text'],
+            remindAt = todo['remind_at']
+        )
+    return html

@@ -1,24 +1,20 @@
 #!/usr/bin/env python3
 import time
 from http.server import HTTPServer
-# import sys
-# sys.path.insert(1, '/server')
 from server.main import Server
 import os
 import sys
 
-HOST_NAME = '127.0.0.1'
-PORT_NUMBER = 80
+HOST_NAME = '127.0.0.1' # Альтернатива localhost
+PORT_NUMBER = 80 # Порт
 
 if __name__ == '__main__':
-    # global ROOT 
-    # ROOT = os.path.dirname(os.path.abspath(__file__))
     os.chdir(sys.path[0]) # Определяем корневую директорию проекта
     httpd = HTTPServer((HOST_NAME, PORT_NUMBER), Server)
-    print(time.asctime(), 'Server UP - %s:%s' % (HOST_NAME, PORT_NUMBER))
+    print(time.asctime(), 'Server UP - %s:%s' % (HOST_NAME, PORT_NUMBER)) # Логаем время запуска сервера
     try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
+        httpd.serve_forever() # Запускаем сервер
+    except KeyboardInterrupt: # При нажатии CTRL + C закрываем соединение с сервером и логаем
         pass
     httpd.server_close()
     print(time.asctime(), 'Server DOWN - %s:%s' % (HOST_NAME, PORT_NUMBER))

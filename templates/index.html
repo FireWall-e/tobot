@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Tobot</title>  
+        <title>Tobot</title>
+        
+        <!-- Мета-теги контента страницы -->
         <meta charset="UTF-8">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+        <!-- Подключаем CSS стили -->
         <link rel="stylesheet" href="/assets/css/main.css">
         <link rel="stylesheet" href="/assets/css/index/main.css">
-        <!-- <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap&subset=cyrillic" rel="stylesheet">  -->
-        <!-- <link href="https://fonts.googleapis.com/css?family=Roboto:300&display=swap&subset=cyrillic" rel="stylesheet">  -->
-        <!-- <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:300&display=swap&subset=cyrillic" rel="stylesheet"> -->
+        
+        <!-- Подключаем JavaScript скрипты -->
         <script type="text/javascript" src="/assets/js/index/main.js"></script>
     </head>
     <body>
@@ -22,11 +25,9 @@
                     <div class="controls">
                         <button class="controls__item hover--zoom" onclick="App.signIn.showForm()" title="Sign in">
                             <i class="icon icon--sign-in controls-icon"></i>
-                            <!-- <span class="controls-text">Sign in</span> -->
                         </button>
                         <button class="controls__item hover--zoom" onclick="App.signUp.showForm()" title="Sign up">
                             <i class="icon icon--sign-up controls-icon"></i>
-                            <!-- <span class="controls-text">Sign up</span> -->
                         </button>
                     </div>
                     <button class="content__button hover--zoom" onclick="App.about.show()" title="About Tobot">
@@ -34,7 +35,6 @@
                     </button>
                 </div>
                 <div class="content__item slide sign-in">
-                    <!-- <div class="secondary__item sign-in"> -->
                         <div class="headline">
                             <button class="return" onclick="App.signIn.hideForm()" title="Return">
                                 <i class="icon icon--return"></i>
@@ -48,13 +48,6 @@
                                 <i class="icon icon--submit"></i>
                             </button>
                         </form>
-                    <!-- </div> -->
-                    <!-- <div class="secondary__item sign-up">
-                        <h1 class="title">Sign up</h1>
-                        <form action="" class="sign-up__form form">
-
-                        </form>
-                    </div> -->
                 </div>
                 <div class="content__item slide sign-up">
                     <div class="headline">
