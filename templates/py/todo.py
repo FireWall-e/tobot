@@ -1,21 +1,28 @@
 def Main(dbConfig, requestParams):
-    return renderTodoPage(dbConfig, requestParams['id']) if 'id' in requestParams else renderTodosPage(dbConfig)
+    return renderTodoPage(dbConfig, requestParams['id'][0]) if 'id' in requestParams else renderTodosPage(dbConfig)
 
 def renderTodoPage(dbConfig, todoId):
-    from functions.main import getMilliseconds
-
+    from functions.main import getDateMilliseconds
+    print('OK', getDateMilliseconds(), todoId)
     todo = getTodo(dbConfig, todoId)
+
+    date = ''
+    time = ''
+    if todo['remind_at']:
+        dateTime = todo['remind_at'].split(' ')
+        date = dateTime[0]
+        time = dateTime[1]
     todoHTML = \
         """
             <div class="todo page">
                 <input class="todo__item title" value="{title}"></input>
                 <textarea class="todo__item text">{text}</textarea>
                 <div class="todo__item">
-                    <div class="todo__column remind" title="Remind time should be greater then 10 minutes and less then a year">
+                    <div class="todo__column remind" title="Remind time should be greater then 5 minutes and less then a year">
                         <span class="label">Remind at:</span>
                         <div class="datepicker">
-                            <input type="text" name="date" class="datepicker__item date" pattern="^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.(19|20)\d\d$" placeholder="Date (dd.mm.yy)" title="Format (dd.mm.yyyy), example - 01.11.2011" value="" required/>
-                            <input type="text" name="time" class="datepicker__item time" pattern="^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" placeholder="Time 24-h (hh:mm)" title="24-hour format (hh:mm), example - 08:30" value="" required/>
+                            <input type="text" name="date" class="datepicker__item date" pattern="^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.(19|20)\d\d$" placeholder="Date (dd.mm.yy)" title="Format (dd.mm.yyyy), example - 01.11.2011" value="{date}" required/>
+                            <input type="text" name="time" class="datepicker__item time" pattern="^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$" placeholder="Time 24-h (hh:mm)" title="24-hour format (hh:mm), example - 08:30" value="{time}" required/>
                         </div>
                     </div>
                 </div>
@@ -24,7 +31,8 @@ def renderTodoPage(dbConfig, todoId):
         .format(
             title = todo['title'],
             text = todo['text'],
-            remindAt = todo['remind_at'],
+            date = date,
+            time = time
         ) 
     return """
         <!DOCTYPE html>
@@ -65,7 +73,7 @@ def renderTodoPage(dbConfig, todoId):
     .format(
         todoId = todoId,
         todoHTML = todoHTML,
-        serverTimeMS = getMilliseconds()
+        serverTimeMS = getDateMilliseconds()
     )
 
 def getTodo(dbConfig, todoId):
@@ -76,6 +84,8 @@ def getTodo(dbConfig, todoId):
     return todo
 
 def renderTodosPage(dbConfig):
+    from functions.main import getDateMilliseconds
+
     todos = getTodos(dbConfig)
     todosHTML = renderItems(todos)
     containerClass = ' empty' if not todosHTML else ''
@@ -89,6 +99,10 @@ def renderTodosPage(dbConfig):
             <title>Tobot - todo</title>
             <link rel="stylesheet" href="/assets/css/main.css">
             <link rel="stylesheet" href="/assets/css/todo/main.css">
+            <script>
+                'use strict';
+                const serverTimeMS = {serverTimeMS};
+            </script>
             <script type="text/javascript" src="/assets/js/todo/main.js"></script>
         </head>
         <body>
@@ -111,7 +125,8 @@ def renderTodosPage(dbConfig):
     """\
     .format(
         containerClass = containerClass,
-        todosHTML = todosHTML
+        todosHTML = todosHTML,
+        serverTimeMS = getDateMilliseconds()
     )
 
 def getTodos(dbConfig):

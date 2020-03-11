@@ -4,6 +4,7 @@ window.onload = () => {
         let localTimeS = parseInt((new Date(serverTimeMS)).getTime() / 1000);
 
         // this.getT = () => { return time };
+        // Ведем учет текущего времени
         (() => {
             setInterval(() => {
                 localTimeS += 2;
@@ -85,17 +86,18 @@ window.onload = () => {
                     // }
                     // date.required = time.required = true;
                     if (date.reportValidity() && time.reportValidity()) {
-                        const minRemindTresholdS = 600; // 10 minutes
-                        const maxRemindTresholdS = 31536000; // 1 year
+                        const minRemindTresholdS = 300; // 5 minutes
+                        const maxRemindTresholdS = 31536000; // 1 year = 365 days
                         const dateArr = date.value.split('.');
-                        date = ([dateArr[0], dateArr[1]] = [dateArr[1], dateArr[0]], dateArr.join('.')); // Bring to format mm.dd.yyyy fix
+                        const dateMDY = ([dateArr[0], dateArr[1]] = [dateArr[1], dateArr[0]], dateArr.join('.')); // Bring to format mm.dd.yyyy fix
+                        date = date.value;
                         time = time.value;
-                        const remindAtS = parseInt((new Date(`${date} ${time}`)).getTime() / 1000);
+                        const remindAtS = parseInt((new Date(`${dateMDY} ${time}`)).getTime() / 1000);
                         const deltaS = remindAtS - localTimeS;
-                        console.log('date', date, 'time', time, 'remindMS is ', remindAtS, 'deltaS', deltaS);
+                        console.log('date', date, 'dateMDY', dateMDY, 'time', time, 'remindMS is ', remindAtS, 'deltaS', deltaS);
                         if (deltaS > minRemindTresholdS && deltaS < maxRemindTresholdS) {
                             remind.className = 'todo__column remind valid';
-                            return [true, deltaS]; // deltaS - через сколько секунд уведомить пользователя
+                            return [true, deltaS, `${date} ${time}`, [dateMDY.replace(/\./g, '/'), time]]; // deltaS - через сколько секунд уведомить пользователя
                         }
                     }
                     remind.className = 'todo__column remind invalid';
@@ -112,21 +114,53 @@ window.onload = () => {
                 window.location.href = '/todo?id=' + todoId;
             };
 
-            this.save = () => {
+            this.save = (todoId) => {
+                loading.start('.container');
                 const result = checkRemind();
                 if (result[0]) {
                     // post
                     // if delta provided add it to payload
+                    const title = document.querySelector('.title').value;
+                    const text = document.querySelector('.text').value;
+                    const payload = {
+                        todoId: todoId,
+                        title: title,
+                        text: text
+                    };
+
+                    if (result[1]) {
+                        payload['token'] = localStorage.getItem('token');
+                        payload['timeoutS'] = result[1];
+                        payload['remindAt'] = result[2];
+                        payload['remindAtMDYArray'] = result[3]
+                    }
+
+                    post({
+                        url: '/ajax',
+                        data: {
+                            doAction: 'save',
+                            payload: payload
+                        },
+                        success: (response) => {
+                            console.log('save response is ', response);
+                        },
+                        always: () => {
+                            loading.end();
+                        }
+                    });
+                }
+                else {
+                    loading.end();
                 }
                 // console.log('save formdata is ', );
             };
 
-            this.discard = () => {
-
+            this.discard = (todoId) => {
+                window.location.reload(true);
             };
 
             this.delete = (todoId) => {
-
+                loading.start('.container');
             };
 
             this.deleteAll = () => {
@@ -139,8 +173,9 @@ window.onload = () => {
                 post({
                     url: '/ajax',
                     data: {
-                        doAction: 'createTodo',
+                        doAction: 'create',
                         payload: {
+                            token: localStorage.getItem('token'),
                             todoId: todoId
                         }
                     },
@@ -174,8 +209,9 @@ window.onload = () => {
         };
 
         (() => {
-            console.log('EXECUTED');
+           
             const token = localStorage.getItem('token');
+            console.log('EXECUTED ', token);
             if (!token) {
                 window.location.replace('/');
             }
@@ -189,7 +225,7 @@ window.onload = () => {
                         }
                     },
                     always: (tokenIsValid) => {
-                        // console.log('token is valid', tokenIsValid, typeof tokenIsValid);
+                        console.log('token is valid', tokenIsValid, typeof tokenIsValid);
                         if (!tokenIsValid) { 
                             window.location.replace('/');
                         }
