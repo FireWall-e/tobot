@@ -1,13 +1,24 @@
+# Функция которая будет вызвана мгновенно
+# Принимает название действия (функции) - actionName
+# Данные со стороны клиента - payload
+# И ссылку на БД - dbConfig
 def Main(actionName, payload, dbConfig):
-    # print('KOK', doAction)
+    # Библиотека для работы с БД
+    # https://dataset.readthedocs.io/en/latest/
     import dataset
-
+    # Подключаемся к БД
+    # https://dataset.readthedocs.io/en/latest/api.html#connecting
     db = dataset.connect(dbConfig['url'])
-    # print('OK')
-    # return doAction(actionName, {'payload': payload, 'db': db})
+    # Возвращаем результат выполнения функции с динамическим именем actionNaem
+    # Например, если actionName = 'create', то выполнится функция create, которая описана ниже
+    # С передачей таких параметров как (опциональные) данные со стороны клиента - payload
+    # И базой данных
     return globals()[actionName](payload, db)
-
+# Функция, которая отвечает за запись (инициализацию) нового todo в соответствующую таблицу БД - todos
 def create(payload, db):
+    # Имортируем нашу обертку (wrapper) для работы с токенами
+    # А именно функцию decode, которая принимает токен и отдает зашифрованные в нем данные (username)
+    # https://jwt.io/introduction/
     from api.jwt.main import decode
     username = decode(payload['token'])['username']
 

@@ -8,7 +8,7 @@ class RequestHandler():
     # Главная конфигурационная переменная
     config = {
         'char-encoding': 'UTF-8',
-        'database': {
+        'database': { # https://dataset.readthedocs.io/en/latest/index.html
             'url': 'sqlite:///database/tobot.db'
         },
         'ajax': { # Конфиг для ajax запросов
@@ -118,7 +118,7 @@ class RequestHandler():
         # По дефолту выставляем код успешного ответа - 200
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
         self.status = 200
-        
+
         # Если запрашивается файл, то бишь есть запрашиваемое расширение и файл существует физически
         # а также является public (публично доступным)
         # то выполняется данное условие
