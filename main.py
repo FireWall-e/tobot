@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import time
+# Библиотеки для работы с сервером
 from http.server import HTTPServer
 from server.main import Server
+# Системные библиотеки
 import os
 import sys
 
