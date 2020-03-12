@@ -111,6 +111,11 @@ def save(payload, db):
         username = decode(payload['token'])['username']
         user = tableUsers.find_one(username = username)
         # Команда для создания нового "единоразового" задания в планировщике
+        # После создания задание его можно просмотреть в планировщике заданий windows 
+        # С соответствующим названием вида Remind{todoId}
+        # Стоит учесть, что после выполнения задания, оно всеравно остается в планировщике
+        # Его можно удалить вручную, или просто удалить запись. Также можно оставить поля даты и времени соответствующей записи
+        # Пустыми с дальнейшем сохранением изменений
         # https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/schtasks#BKMK_once
         commandToExecute = \
         'schtasks /create /tn "Remind{todoId}" /tr "{toRun} {arguments}" /sc once /sd {dateMDY} /st {time}' \
