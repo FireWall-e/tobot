@@ -1,12 +1,21 @@
-# CLI run command:> python notifyUser.py --chat_id [id] --message [message]
-
+# Библиотека для работы с http запросами
 import requests
+# Библиотека для парса аргументов командной строки
 from argparse import ArgumentParser
 import sys
-# from api.telegram.main import url
+
+# Токен нашего бота, который генерируется у BotFather при создании бота - команда /newbot
+# /setuserpic Команда для присвоения аватарки боту
+# https://telegram.me/BotFather
+# https://core.telegram.org/bots/api
 botToken = '1135448518:AAGS2SxWLmiqyDIm3cVQft4BGKHINxSw4So'
+# Ссылка для отправки сообщения бота пользователю
+# https://core.telegram.org/bots/api#sendmessage
 url = 'https://api.telegram.org/bot' + botToken + '/sendMessage'
 
+# Функция парса аргументов
+# может принять такие аргументы, как
+# chat_id, message и parse_mode
 def parseCL():
     parser = ArgumentParser()
     parser.add_argument("-ci", "--chat_id",
@@ -17,6 +26,7 @@ def parseCL():
                     help="Parse mode parameter https://core.telegram.org/bots/api#markdown-style")
     return parser.parse_args()
 
+# Функция, которая отправляет сообщение пользователю с указанными параметрами
 def sendTelegramMessage(chatId, message, parseMode):
     params = {
         'chat_id': chatId,
@@ -24,16 +34,14 @@ def sendTelegramMessage(chatId, message, parseMode):
         'parse_mode': parseMode
     }
 
-    response = requests.get(url, params)
-    print('response is         ', response)
+    requests.get(url, params)
 
 
 def Main():
+    # Парсим аргументы командной строки
     args = parseCL()
-
-    # import db check if todo still relevant
-    # print('received ', args)
+    # Отправляем сообщение с полученными аргументами
     sendTelegramMessage(args.chat_id, args.message, args.parse_mode)
-    # sendTelegramMessage(596421831, 'testme')
 
+# Вызываем мгновенно
 Main()

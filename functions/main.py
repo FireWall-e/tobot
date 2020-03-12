@@ -1,24 +1,40 @@
+# Тут содержатся вспомогательные функциии, которые используются глобально по всему проекту
+
+# Функция динамического импорта модуля (файла)
 def dynamicImport(module, name):
     module = __import__(module, fromlist=[name])
     return getattr(module, name)
 
+# Функция поиска свойства propertiesVector в объекте со многими вложенностями - dictionary
+# propertiesVector -  массив из свойств, в порядке слева направо, т.е.
+#            prop1 -> prop1_2
+#           /
+# для object проверка наличия свойства prop1_2 вызов findProperty будет иметь следущий вид - findProperty(object, ['prop1', 'prop1_2'])
+#           \
+#            prop2 -> prop2_2
+# если returnValueIfTrue = True, то вернется значение этого свойства вместо простого True
 def findProperty(dictionary, propertiesVector, returnValueIfTrue = False):
     for property in propertiesVector:
         try:
             dictionary = dictionary[property]
         except KeyError:
             return False
-        else: # True
+        else:
             continue
     return dictionary if returnValueIfTrue else True
 
+# Проверяет наличие свойств в итерируемом объекте
+# Возвращает True, если имеется хотя бы одно
 def isIterable(iterator):
     return any(True for _ in iterator)
 
+# Возвращает текущее время в миллисекундах
 def getDateMilliseconds():
     import time
     return int(round(time.time() * 1000))
 
+# Функция для вызова команды, которая будет вызвана по истечению времени (в секундах) timeoutS
+# Не используется, т.к. блокирует основной поток
 def createTimeoutCommand(timeoutS, commandToExecute):
     maxTimeoutPerOnceS = 99999
     command = ''
@@ -35,27 +51,20 @@ def createTimeoutCommand(timeoutS, commandToExecute):
     command += ' & {} & exit'.format(commandToExecute)
     return command
 
+# Выполняет полученную команду
 def executeCommand(command):
     import os
     os.system(command)
 
+# Возвращает путь к python.exe
 def getPythonExePath():
-    # from conda.cli.python_api import Commands, run_command
-    # import re
-
-    # condaInfo = run_command(Commands.INFO)
-    # condaBasePath = re.search(r"(?<=base\senvironment\s:\s).*(?=\()", str(condaInfo))\
-    #                   .group()\
-    #                   .strip()\
-    #                   .replace('\\\\', '/')
-    # pythonExePath = condaBasePath + '/python.exe'
-
     import sys
     pythonExePath = sys.executable
-    # print('pythonExePath is ', pythonExePath)
-    # Expect something like C:/Data/Anaconda/python.exe
+ 
     return pythonExePath
 
+# Генерирует случайную строку длины length, которая состоит из чисел и букв латиницы
+# Не используется
 def randomAlphaNum(length):
     import string
     import random
