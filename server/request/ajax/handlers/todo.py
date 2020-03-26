@@ -113,7 +113,7 @@ def save(payload, db):
         # Путь к текущей директории
         currentDir = os.path.dirname(__file__)
         # Достать текущий адрес ngrok из файла
-        currentSiteUrl = open(os.path.join(currentDir, 'currurl.txt')).readline().strip()
+        ngrokUrl = open(os.path.join(currentDir, 'ngrok.txt')).readline().strip()
         # Команда для создания нового "единоразового" задания в планировщике
         # После создания задание его можно просмотреть в планировщике заданий windows 
         # С соответствующим названием вида Remind{todoId}
@@ -133,8 +133,8 @@ def save(payload, db):
                 chatId = '--chat_id {chatId}'.format(chatId = user['chat_id']), # фразы начинающиеся с '--' или '-' - это аргументы командной строки, которые принимает файл notifyUser.py
                 message = '--message \\"Hi, @{username}! Please dont forget about {link}'.format(
                     username = username,
-                    link = '[{title}]({ngrokurl}/todo?id={todoId})! :)\\"'.format(
-                        ngrokurl = currentSiteUrl or 'http://127.0.0.1:80',
+                    link = '[{title}]({ngrokUrl}/todo?id={todoId})! :)\\"'.format(
+                        ngrokUrl = ngrokUrl or 'http://127.0.0.1:80',
                         title = payload['title'] or 'nothing', # Если у записи нет названия записи, то nothing по умолчанию
                         todoId = payload['todoId']
                     )
