@@ -133,7 +133,7 @@ window.onload = () => {
                         payload['remindAt'] = result[2];
                         payload['remindAtMDYArray'] = result[3]
                     }
-                    // Отправляем запрос на серверы
+                    // Отправляем запрос на сервер
                     post({
                         url: '/ajax',
                         data: {
