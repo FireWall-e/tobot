@@ -5,50 +5,7 @@ window.onload = () => {
     this.App = new function() {
         // Записываем серверное время в локальную переменную преобразовывая миллисекунды в секунды
         let localTimeS = parseInt((new Date(serverTimeMS)).getTime() / 1000);
-        // Анонимная функция такого вида будет вызвана мгновенно
-        (() => {
-            // Верифицируем токен на загрузке страницы
-            // Достаем токен из локального хранилища
-            const token = localStorage.getItem('token');
-            // Если значения нет, то редиректим на главную страницу
-            if (!token) {
-                window.location.replace('/');
-            }
-            else { // Токен есть
-                post({
-                    url: '/ajax',
-                    data: {
-                        doAction: 'verifyUserToken', // Экшн/функция, которая выполнится на сервере
-                        payload: {         
-                            token: token
-                        }
-                    },
-                    always: (response) => {
-                        // Если токен невалидный, то редиректим на главную
-                        if (response === 'invalidToken') { 
-                            window.location.replace('/');
-                        }
-                        else { // Токен валидный, а response хранит разметку с todo
-                            if (response) {
-                                // Убираем класс empty у элемента с классом container
-                                document.querySelector('.container').classList.remove('empty');
-                                // Если контейнер todos пуст, то вставляем разметку
-                                if (!document.querySelector('.todos').innerHTML && !document.querySelector('.todos').innerText) {
-                                    document.querySelector('.todos').innerHTML = response;
-                                }
-                            }
-                            // Убираем начальное загрузочное окно страницы
-                            document.querySelector('.modal.loading').remove();
-                        }
-                    }
-                });
-            }
-
-            // Каждые 2000 миллисекунды добавляет две секунды к локальному времени
-            setInterval(() => {
-                localTimeS += 2;
-            }, 2000);
-        })();
+       
         // Идентично модулю из index
         const post = (options) => {
             const headers = options.requestHeaders || {
@@ -116,7 +73,7 @@ window.onload = () => {
                     // Если дата и время валидны
                     if (date.reportValidity() && time.reportValidity()) {
                         // Минимальное время через которое бот должен прислать напоминание
-                        const minRemindTresholdS = 300; // 5 minutes
+                        const minRemindTresholdS = 60; // 5 minutes
                         // Максимальное время через которое бот должен прислать напоминание
                         const maxRemindTresholdS = 31536000; // 1 year = 365 days
                         // Разбиваем строку с датой по символу точки и получаем массив с 3 элементами
@@ -313,5 +270,59 @@ window.onload = () => {
                 });
             };
         };
+
+        this.return = () => {
+            window.location.href = '/todo';
+        };
+
+        this.logout = () => {
+            localStorage.removeItem('token');
+            window.location.replace('/');
+        };
+
+         // Анонимная функция такого вида будет вызвана мгновенно
+         (() => {
+            // Верифицируем токен на загрузке страницы
+            // Достаем токен из локального хранилища
+            const token = localStorage.getItem('token');
+            // Если значения нет, то редиректим на главную страницу
+            if (!token) {
+                window.location.replace('/');
+            }
+            else { // Токен есть
+                post({
+                    url: '/ajax',
+                    data: {
+                        doAction: 'verifyUserToken', // Экшн/функция, которая выполнится на сервере
+                        payload: {         
+                            token: token
+                        }
+                    },
+                    always: (response) => {
+                        // Если токен невалидный, то редиректим на главную
+                        if (response === 'invalidToken') { 
+                            window.location.replace('/');
+                        }
+                        else { // Токен валидный, а response хранит разметку с todo
+                            if (response) {
+                                // Убираем класс empty у элемента с классом container
+                                document.querySelector('.container').classList.remove('empty');
+                                // Если контейнер todos пуст, то вставляем разметку
+                                if (!document.querySelector('.todos').innerHTML && !document.querySelector('.todos').innerText) {
+                                    document.querySelector('.todos').innerHTML = response;
+                                }
+                            }
+                            // Убираем начальное загрузочное окно страницы
+                            document.querySelector('.modal.loading').remove();
+                        }
+                    }
+                });
+            }
+
+            // Каждые 2000 миллисекунды добавляет две секунды к локальному времени
+            setInterval(() => {
+                localTimeS += 2;
+            }, 2000);
+        })();
     };
 };

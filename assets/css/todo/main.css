@@ -52,6 +52,7 @@
 .panel {
     margin-bottom: var(--margin-medium);
     display: flex;
+    align-items: flex-end;
     justify-content: flex-end;
     background-color: rgba(255,255,255, .9);
     padding: var(--padding-medium);
@@ -60,11 +61,19 @@
 .panel__item {
     width: 40px;
     height: 40px;
-    
 }
 
 .panel__item:not(:last-child) {
     margin-right: var(--margin-medium);
+}
+
+.panel__item:first-child {
+    margin-right: auto;
+    height: 80%;
+}
+
+.icon--logout {
+    background-image: url('/assets/image/todo/icon/logout-button.svg');
 }
 
 .icon--add-todo {
@@ -125,6 +134,10 @@
 .remind {
     font-size: 12px;
     padding: var(--padding-small) var(--padding-medium);
+}
+
+.icon--return {
+    background-image: url('/assets/image/todo/icon/return-button.svg');
 }
 
 .icon--edit-todo {

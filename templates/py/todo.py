@@ -67,6 +67,7 @@ def renderTodoPage(dbConfig, todoId):
             <main class="main image image--todo">
                 <section class="content">
                     <div class="panel">
+                        <button class="panel__item hover--zoom" title="Back to list" onclick="App.return();"><i class="icon icon--return"></i></button>
                         <button class="panel__item hover--zoom" title="Save changes" onclick="App.todo.save({todoId});"><i class="icon icon--save-todo"></i></button>
                         <button class="panel__item hover--zoom" title="Discard changes" onclick="App.todo.discard({todoId});"><i class="icon icon--discard-todo"></i></button>
                         <button class="panel__item hover--zoom" title="Delete todo" onclick="App.todo.delete({todoId});"><i class="icon icon--delete-todo"></i></button>
@@ -120,6 +121,7 @@ def renderTodosPage():
             <main class="main image image--todo">
                 <section class="content">
                     <div class="panel">
+                        <button class="panel__item hover--zoom" title="Log-out" onclick="App.logout();"><i class="icon icon--logout"></i></button>
                         <button class="panel__item hover--zoom" title="Add todo" onclick="App.todo.add();"><i class="icon icon--add-todo"></i></button>
                         <button class="panel__item hover--zoom" title="Delete all todos" onclick="App.todo.deleteAll();"><i class="icon icon--delete-todos"></i></button>
                     </div>
